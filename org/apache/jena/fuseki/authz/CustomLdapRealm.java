@@ -14,8 +14,14 @@ import org.apache.shiro.realm.ldap.JndiLdapRealm;
 import org.apache.shiro.realm.ldap.LdapContextFactory;
 import org.apache.shiro.realm.ldap.LdapUtils;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CustomLdapRealm extends JndiLdapRealm {
+
+  private static final Logger log = LoggerFactory.getLogger(
+    CustomLdapRealm.class
+  );
 
   private String groupSearchBase;
   private String groupNameAttribute;
@@ -53,6 +59,9 @@ public class CustomLdapRealm extends JndiLdapRealm {
       username +
       ",ou=agents,dc=hyperdata,dc=it))";
 
+    log.debug("Searching for roles with filter: {}", searchFilter);
+    log.debug("Using group search base: {}", groupSearchBase);
+
     NamingEnumeration<SearchResult> results = ldapContext.search(
       groupSearchBase,
       searchFilter,
@@ -61,11 +70,14 @@ public class CustomLdapRealm extends JndiLdapRealm {
     Set<String> roleNames = new HashSet<>();
     while (results.hasMore()) {
       SearchResult result = results.next();
+      log.debug("Found group: {}", result.getNameInNamespace());
       Attribute groupNameAttr = result.getAttributes().get(groupNameAttribute);
       if (groupNameAttr != null) {
         NamingEnumeration<?> groupNames = groupNameAttr.getAll();
         while (groupNames.hasMore()) {
-          roleNames.add(groupNames.next().toString());
+          String roleName = groupNames.next().toString();
+          log.debug("Adding role: {}", roleName);
+          roleNames.add(roleName);
         }
       }
     }
