@@ -39,6 +39,13 @@ public class CustomLdapRealm extends JndiLdapRealm {
 
     try {
       roleNames = getRoleNamesForUser(username, ldapContext);
+    } catch (NamingException e) {
+      log.error(
+        "LDAP naming error while attempting to retrieve authorization for user [{}]",
+        username,
+        e
+      );
+      throw e;
     } finally {
       LdapUtils.closeContext(ldapContext);
     }
