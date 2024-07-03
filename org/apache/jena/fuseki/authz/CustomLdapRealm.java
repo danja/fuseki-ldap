@@ -15,8 +15,6 @@ import org.apache.shiro.realm.ldap.LdapContextFactory;
 import org.apache.shiro.realm.ldap.LdapUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 
-// ... existing imports ...
-
 public class CustomLdapRealm extends JndiLdapRealm {
 
   private String groupSearchBase;
@@ -28,8 +26,8 @@ public class CustomLdapRealm extends JndiLdapRealm {
     PrincipalCollection principals,
     LdapContextFactory ldapContextFactory
   ) throws NamingException {
-    // String username = (String) getAvailablePrincipal(principals);
-    String username = (String) principals.getPrimaryPrincipal();
+    String username = (String) getAvailablePrincipal(principals);
+
     LdapContext ldapContext = ldapContextFactory.getSystemLdapContext();
     Set<String> roleNames;
 
@@ -42,7 +40,6 @@ public class CustomLdapRealm extends JndiLdapRealm {
     return new SimpleAuthorizationInfo(roleNames);
   }
 
-  // Remove @Override annotation if method does not exist in superclass
   protected Set<String> getRoleNamesForUser(
     String username,
     LdapContext ldapContext
@@ -56,7 +53,6 @@ public class CustomLdapRealm extends JndiLdapRealm {
       username +
       ",ou=agents,dc=hyperdata,dc=it))";
 
-    // Perform LDAP search operation inline
     NamingEnumeration<SearchResult> results = ldapContext.search(
       groupSearchBase,
       searchFilter,
