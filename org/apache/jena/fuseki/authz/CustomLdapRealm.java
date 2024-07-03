@@ -69,11 +69,14 @@ public class CustomLdapRealm extends JndiLdapRealm {
     log.debug("Searching for roles with filter: {}", searchFilter);
     log.debug("Using group search base: {}", groupSearchBase);
 
-    NamingEnumeration<SearchResult> results = ldapContext.search(
-      groupSearchBase,
-      searchFilter,
-      searchCtls
-    );
+    NamingEnumeration<SearchResult> results;
+    try {
+      results = ldapContext.search(groupSearchBase, searchFilter, searchCtls);
+    } catch (NamingException e) {
+      log.error("LDAP search failed with filter: {}", searchFilter, e);
+      throw e;
+    }
+
     Set<String> roleNames = new HashSet<>();
     while (results.hasMore()) {
       SearchResult result = results.next();
